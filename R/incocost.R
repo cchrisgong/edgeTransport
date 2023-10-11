@@ -33,7 +33,10 @@ toolIncocost <- function(annual_mileage, load_factor, fcr_veh, REMINDp) {
 
   ## model availability is the same for all technologies
   pinco[, pmod_av := pmod_av]
-
+  CHA_val = data.table(technology = c("BEV", "BEV", "NG", "FCEV", "Hybrid Electric", "BEV", "NG", "FCEV", "Hybrid Electric", "BEV", "Hybrid Electric"),
+                       cost_comp = c("pmod_av_startv", "prange_startv", "pmod_av_startv", "pmod_av_startv", "pmod_av_startv", "prisk", "prisk", "prisk", "prisk", "pchar", "pchar"),
+                       value = c(10000, 10000, 69300, 69300, 69300, 3800, 3800, 3800, 3800, 1000, 1000))
+  #                                
   ## EU values for model availability and range anxiety in 2020
   EU_val = data.table(technology = c("BEV", "BEV", "NG", "FCEV", "Hybrid Electric", "BEV", "NG", "FCEV", "Hybrid Electric", "BEV", "Hybrid Electric"),
                       cost_comp = c("pmod_av_startv", "prange_startv", "pmod_av_startv", "pmod_av_startv", "pmod_av_startv", "prisk", "prisk", "prisk", "prisk", "pchar", "pchar"),
@@ -45,6 +48,8 @@ toolIncocost <- function(annual_mileage, load_factor, fcr_veh, REMINDp) {
   ## use DEU as a comparison (all EU regions will not be overwritten anyways)
   REMINDp[, resc := meanp/meanp[technology=="Liquids" & region =="DEU"]]
   allreg = merge(EU_val, REMINDp, by = "technology", allow.cartesian = T)
+  allreg = merge(CHA_val, REMINDp, by = "technology", allow.cartesian = T)
+  
   allreg[!region %in% c("DEU", "ECE", "ECS", "ENC", "ESC", "ESW", "EWN", "FRA", "UKI"), value := value*((resc-1)/2+1)]
   allreg = allreg[, c("meanp", "resc") := NULL]
   allreg = dcast(allreg,... ~ cost_comp, value.var = "value")
